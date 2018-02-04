@@ -45,3 +45,16 @@ func TestClient_GetTotalAsset(t *testing.T) {
 	}
 	t.Logf("%+v", ta)
 }
+
+func TestClient_NoLogin(t *testing.T) {
+	hc := &http.Client{}
+	opts := &ClientOption{Host: "https://moneyforward.com", SessionID: "invalid session"}
+	c, err := NewClient(hc, opts)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
+	if _, err := c.GetTotalAsset(ctx); err != nil {
+		t.Logf("%+v", err)
+	}
+}

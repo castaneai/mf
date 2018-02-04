@@ -64,7 +64,14 @@ func (c *Client) getGoQueryDoc(ctx context.Context, path string) (*goquery.Docum
 		return nil, fmt.Errorf("[mf] %s", res.Status)
 	}
 
-	return goquery.NewDocumentFromResponse(res)
+	doc, err := goquery.NewDocumentFromResponse(res)
+	if err != nil {
+		return nil, err
+	}
+	if len(doc.Find("#header-container").Nodes) < 1 {
+		return nil, fmt.Errorf("[mf] no login")
+	}
+	return doc, nil
 }
 
 func (c *Client) GetTransactionHistories(ctx context.Context) ([]*TransactionHistory, error) {
@@ -83,6 +90,19 @@ func (c *Client) GetTransactionHistories(ctx context.Context) ([]*TransactionHis
 		histories = append(histories, &TransactionHistory{Content: content, Amount: amount})
 	})
 	return histories, nil
+}
+
+// For debug
+func (c *Client) GetHtml(ctx context.Context, spath string) (string, error) {
+	doc, err := c.getGoQueryDoc(ctx, spath)
+	if err != nil {
+		return "", err
+	}
+	hs, err := doc.Html()
+	if err != nil {
+		return "", err
+	}
+	return hs, nil
 }
 
 func (c *Client) GetTotalAsset(ctx context.Context) (*TotalAsset, error) {
