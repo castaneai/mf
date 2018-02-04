@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
 	"net/http"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -82,4 +83,21 @@ func (c *Client) GetTransactionHistories(ctx context.Context) ([]*TransactionHis
 		histories = append(histories, &TransactionHistory{Content: content, Amount: amount})
 	})
 	return histories, nil
+}
+
+func (c *Client) GetTotalAsset(ctx context.Context) (*TotalAsset, error) {
+	doc, err := c.getGoQueryDoc(ctx, "/")
+	if err != nil {
+		return nil, err
+	}
+
+	txt := doc.Find(".total-assets .heading-radius-box").First().Text()
+	re := regexp.MustCompile("[0-9]+")
+	amount, err := strconv.Atoi(strings.Join(re.FindAllString(txt, -1), ""))
+	if err != nil {
+		return nil, err
+	}
+	return &TotalAsset{
+		Amount: amount,
+	}, nil
 }

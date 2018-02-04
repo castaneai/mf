@@ -32,3 +32,16 @@ func TestClient_GetTransactionHistories(t *testing.T) {
 		t.Logf("%+v", trans)
 	}
 }
+
+func TestClient_GetTotalAsset(t *testing.T) {
+	c, err := newTestClient()
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
+	ta, err := c.GetTotalAsset(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Logf("%+v", ta)
+}
