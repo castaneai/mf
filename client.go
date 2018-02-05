@@ -82,12 +82,20 @@ func (c *Client) GetTransactionHistories(ctx context.Context) ([]*TransactionHis
 
 	var histories []*TransactionHistory
 	doc.Find("#cf-detail-table tr.target-active").Each(func(i int, s *goquery.Selection) {
+		date, err := time.Parse("2006/01/02", strings.Split(s.Find("td.date").AttrOr("data-table-sortable-value", ""), "-")[0])
+		if err != nil {
+			date = time.Date(1900, 1, 1, 0, 0, 0, 0, time.UTC)
+		}
 		content := strings.TrimSpace(s.Find("td.content").Text())
 		amount, err := strconv.Atoi(strings.Replace(strings.TrimSpace(s.Find("td.amount").Text()), ",", "", -1))
 		if err != nil {
 			amount = 0
 		}
-		histories = append(histories, &TransactionHistory{Content: content, Amount: amount})
+		histories = append(histories, &TransactionHistory{
+			Content: content,
+			Amount:  amount,
+			Date:    date,
+		})
 	})
 	return histories, nil
 }
